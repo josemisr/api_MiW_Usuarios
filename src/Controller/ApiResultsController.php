@@ -3,7 +3,6 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Message;
 use App\Entity\Result;
 use App\Entity\User;

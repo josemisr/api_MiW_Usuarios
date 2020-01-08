@@ -84,7 +84,7 @@ class ApiResultsControllerTest extends BaseTestCase
         $role = self::$faker->word;
         $p_data = [
             'result' => self::$faker->numberBetween(1,10),
-            'userId' => 1,
+            'userId' => $this->createUser(),
             'time' => "2020-01-22T00:00:00+01:00",
         ];
 
@@ -181,6 +181,32 @@ class ApiResultsControllerTest extends BaseTestCase
     }
 
     /**
+     * Test GET /results/user/{userId} 200 Ok
+     *
+     * @param   array $result result returned by testPostResultAction201()
+     * @return  void
+     * @covers  ::getAction()
+     * @depends testPostResultAction201
+     */
+    public function testGetResultAction200ByUser(array $result): void
+    {
+        $headers = $this->getTokenHeaders();
+        self::$client->request(
+            Request::METHOD_GET,
+            self::RUTA_API . '/user/' . $result['user']['id'],
+            [],
+            [],
+            $headers
+        );
+        $response = self::$client->getResponse();
+
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        self::assertJson((string) $response->getContent());
+        $result_aux = json_decode((string) $response->getContent(), true);
+       self::assertNotEmpty($result_aux['results']);
+    }
+
+    /**
      * Test POST /results 400 Bad Request
      *
      * @param   array $results result returned by testPostResultAction201()
@@ -194,7 +220,7 @@ class ApiResultsControllerTest extends BaseTestCase
 
         $p_data = [
             'result' => self::$faker->numberBetween(1,10),
-            'userId' => 3,
+            'userId' => 90000
         ];
         self::$client->request(
             Request::METHOD_POST,
@@ -233,7 +259,7 @@ class ApiResultsControllerTest extends BaseTestCase
         $role = self::$faker->word;
         $p_data = [
             'result' => self::$faker->numberBetween(1,10),
-            'userId' => 1,
+            'userId' => $this->createUser(),
             'time' => "2020-01-22T00:00:00+01:00",
         ];
 
@@ -269,7 +295,7 @@ class ApiResultsControllerTest extends BaseTestCase
         $headers = $this->getTokenHeaders();
         // user doesn't exist
         $p_data = [
-            'userId' => 6
+            'userId' => 90000
         ];
         self::$client->request(
             Request::METHOD_PUT,
@@ -331,7 +357,37 @@ class ApiResultsControllerTest extends BaseTestCase
 
         return $result['id'];
     }
+    /**
+     * Test DELETE /results/user/{userId} 204 No Content
+     *
+     * @param   array $result result returned by testPostResultAction201()
+     * @return  int resultId
+     * @covers  ::deleteAction()
+     * @depends testPostResultAction201
+     * @depends testPostResultAction400
+     * @depends testGetResultAction200
+     * @depends testPutResultAction400
+     */
+    public function testDeleteResultAction204ByUser(array $result): int
+    {
+        $headers = $this->getTokenHeaders();
+        self::$client->request(
+            Request::METHOD_DELETE,
+            self::RUTA_API . '/user/' . $result['user']['id'],
+            [],
+            [],
+            $headers
+        );
+        $response = self::$client->getResponse();
 
+        self::assertEquals(
+            Response::HTTP_NO_CONTENT,
+            $response->getStatusCode()
+        );
+        self::assertEmpty((string) $response->getContent());
+
+        return $result['id'];
+    }
     /**
      * Test POST /results 422 Unprocessable Entity
      *
@@ -453,41 +509,7 @@ class ApiResultsControllerTest extends BaseTestCase
         self::assertSame(Response::HTTP_NOT_FOUND, $r_data['message']['code']);
         self::assertSame(Response::$statusTexts[404], $r_data['message']['message']);
     }
-    /**
-     * Test POST   /results 403 FORBIDDEN
-     * Test PUT    /results/{resultId} 403 FORBIDDEN
-     * Test DELETE /results/{resultId} 403 FORBIDDEN
-     *
-     * @param string $method
-     * @param string $uri
-     * @dataProvider routeProvider403()
-     * @return void
-     * @covers ::postAction()
-     * @covers ::putAction()
-     * @covers ::deleteAction()
-     * @covers \App\EventListener\ExceptionListener::onKernelException()
-     */
-    public function testResultStatus403(string $method, string $uri): void
-    {
-        $headers = $this->getTokenHeaders(
-            self::$role_user['email'],
-            self::$role_user['passwd']
-        );
-        self::$client->request($method, $uri, [], [], $headers);
-        $response = self::$client->getResponse();
 
-        self::assertSame(Response::HTTP_FORBIDDEN, $response->getStatusCode());
-        self::assertJson((string) $response->getContent());
-        $r_body = (string) $response->getContent();
-        self::assertContains('code', $r_body);
-        self::assertContains('message', $r_body);
-        $r_data = json_decode($r_body, true);
-        self::assertSame(Response::HTTP_FORBIDDEN, $r_data['message']['code']);
-        self::assertSame(
-            '`Forbidden`: you don\'t have permission to access',
-            $r_data['message']['message']
-        );
-    }
 
     /**
      * *********
@@ -555,5 +577,35 @@ class ApiResultsControllerTest extends BaseTestCase
             'putAction403'    => [ Request::METHOD_PUT,    self::RUTA_API . '/1' ],
             'deleteAction403' => [ Request::METHOD_DELETE, self::RUTA_API . '/1' ],
         ];
+    }
+
+
+    /**
+     * Route userCreated
+     *
+     * @return  int
+     */
+    public function createUser(): int
+    {
+        $role = self::$faker->word;
+        $p_data = [
+            'email' => self::$faker->email,
+            'password' => self::$faker->password,
+            'roles' => [ $role ],
+        ];
+
+        // 201
+        $headers = $this->getTokenHeaders();
+        self::$client->request(
+            Request::METHOD_POST,
+            self::RUTA_API_USER,
+            [],
+            [],
+            $headers,
+            json_encode($p_data)
+        );
+        $response = self::$client->getResponse();
+        $user = json_decode($response->getContent(), true);
+        return $user['user']['id'];
     }
 }
