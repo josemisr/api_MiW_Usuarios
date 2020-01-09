@@ -44,36 +44,6 @@ class ApiResultsControllerTest extends BaseTestCase
     }
 
     /**
-     * Test GET /results 404 Not Found
-     *
-     * @return void
-     * @covers ::cgetAction
-     */
-//    public function testCGetAction404(): void
-//    {
-//        $headers = [];
-//        self::$client->request(
-//            Request::METHOD_GET,
-//            self::RUTA_API,
-//            [],
-//            [],
-//            $headers
-//        );
-//        $response = self::$client->getResponse();
-//
-//        self::assertEquals(
-//            Response::HTTP_NOT_FOUND,
-//            $response->getStatusCode()
-//        );
-//        $r_body = (string) $response->getContent();
-//        self::assertContains('code', $r_body);
-//        self::assertContains('message', $r_body);
-//        $r_data = json_decode($r_body, true);
-//        self::assertEquals(Response::HTTP_NOT_FOUND, $r_data['message']['code']);
-//        self::assertEquals(Response::$statusTexts[404], $r_data['message']['message']);
-//    }
-
-    /**
      * Test POST /results 201 Created
      *
      * @return array result data
@@ -81,7 +51,6 @@ class ApiResultsControllerTest extends BaseTestCase
      */
     public function testPostResultAction201(): array
     {
-        $role = self::$faker->word;
         $p_data = [
             'result' => self::$faker->numberBetween(1,10),
             'userId' => $this->createUser(),
@@ -185,7 +154,7 @@ class ApiResultsControllerTest extends BaseTestCase
      *
      * @param   array $result result returned by testPostResultAction201()
      * @return  void
-     * @covers  ::getAction()
+     * @covers  ::cgetActionByUser()
      * @depends testPostResultAction201
      */
     public function testGetResultAction200ByUser(array $result): void
@@ -209,12 +178,11 @@ class ApiResultsControllerTest extends BaseTestCase
     /**
      * Test POST /results 400 Bad Request
      *
-     * @param   array $results result returned by testPostResultAction201()
      * @return  void
      * @covers  ::postAction()
      * @depends testPostResultAction201
      */
-    public function testPostResultAction400(array $result): void
+    public function testPostResultAction400(): void
     {
         $headers = $this->getTokenHeaders();
 
@@ -256,7 +224,6 @@ class ApiResultsControllerTest extends BaseTestCase
     public function testPutResultAction209(array $result): array
     {
         $headers = $this->getTokenHeaders();
-        $role = self::$faker->word;
         $p_data = [
             'result' => self::$faker->numberBetween(1,10),
             'userId' => $this->createUser(),
@@ -362,7 +329,7 @@ class ApiResultsControllerTest extends BaseTestCase
      *
      * @param   array $result result returned by testPostResultAction201()
      * @return  int resultId
-     * @covers  ::deleteAction()
+     * @covers  ::deleteActionByUserId()
      * @depends testPostResultAction201
      * @depends testPostResultAction400
      * @depends testGetResultAction200

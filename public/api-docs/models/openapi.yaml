@@ -304,14 +304,14 @@ paths:
         '403':
           $ref: '#/components/responses/403_Forbidden_Response'
         '422':
-          description: '`Unprocessable entity`: userId or result is left out'
+          description: '`Unprocessable entity`: resultId or result is left out'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
               example:
                 code: 422
-                message: '`Unprocessable entity`: userId or result is left out'
+                message: '`Unprocessable entity`: resultId or result is left out'
       security:
         - MiWApiSecurity: []
     options:
@@ -376,14 +376,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Result'
         '400':
-          description: '`Bad Request`: user id does not exists'
+          description: '`Bad Request`: result id does not exists'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
               example:
                 code: 400
-                message: '`Bad Request`: user id does not exists'
+                message: '`Bad Request`: result id does not exists'
         '401':
           $ref: '#/components/responses/401_Unauthorized_Response'
         '403':
@@ -432,7 +432,7 @@ paths:
     get:
       tags:
         - Results
-      summary: Returns a user based on a single ID
+      summary: Returns a Result based on a single ID
       description: 'Returns the results identified by `userId`.'
       operationId: api_results_getByUser
       parameters:

@@ -120,7 +120,7 @@ class ApiResultsController extends AbstractController
                 $format
             );
         }
-            $results = $this->entityManager
+        $results = $this->entityManager
             ->getRepository(Result::class)
             ->findBy([ 'user' => $user_exist]);
         $format = Utils::getFormat($request);
@@ -220,7 +220,7 @@ class ApiResultsController extends AbstractController
      * Summary: Provides the list of HTTP supported methods
      * Notes: Return a &#x60;Allow&#x60; header with a list of HTTP supported methods.
      *
-     * @param  int $resultId User id
+     * @param  int $resultId Result id
      * @return Response
      * @Route(
      *     "/{resultId}.{_format}",
@@ -271,7 +271,7 @@ class ApiResultsController extends AbstractController
      */
     public function deleteAction(Request $request, int $resultId): Response
     {
-        // Puede crear un usuario sólo si tiene ROLE_ADMIN
+
         if (!$this->isGranted('ROLE_ADMIN')) {
             throw new HttpException(   // 403
                 Response::HTTP_FORBIDDEN,
@@ -303,7 +303,7 @@ class ApiResultsController extends AbstractController
 
     /**
      * Summary: Returns a result based on a single ID
-     * Notes: Returns the result identified by &#x60;resultId&#x60;.
+     * Notes: Returns the result identified by &#x60;user Id&#x60;.
      *
      * @param Request $request
      * @param  int userId user id
@@ -327,8 +327,6 @@ class ApiResultsController extends AbstractController
      */
     public function deleteActionByUserId(Request $request, int $userId): Response
     {
-
-        // Puede crear un usuario sólo si tiene ROLE_ADMIN
         if (!$this->isGranted('ROLE_ADMIN')) {
             throw new HttpException(   // 403
                 Response::HTTP_FORBIDDEN,
@@ -393,7 +391,7 @@ class ApiResultsController extends AbstractController
      */
     public function postAction(Request $request): Response
     {
-        // Puede crear un usuario sólo si tiene ROLE_ADMIN
+        // Puede crear un resultado sólo si tiene ROLE_ADMIN
         if (!$this->isGranted('ROLE_ADMIN')) {
             throw new HttpException(   // 403
                 Response::HTTP_FORBIDDEN,
